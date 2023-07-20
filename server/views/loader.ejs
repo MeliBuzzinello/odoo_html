@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com;">
+    <link rel="icon" href="imagenes/favicon-32x32.png" type="png" sizes="32">
+    <title>Home</title>
+    <link rel="stylesheet" href="css/estilos.css">
+    <script crossorigin="anonymous" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+    <!-- <style>
+           
+        .datos {
+            margin-top: 20px;
+        }
+    
+        .datos h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+    
+        .datos ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+    
+        .datos li {
+            margin-bottom: 5px;
+        }
+    </style> -->
+</head>
+<body>
+    <div class="signupFrm">
+        <!--<a href="http://localhost:24172/otraRuta">Otra ruta</a>-->
+        <form id="miFormulario" class="form">
+            <h1 class="title sub">CARGA DE DISPOSITIVOS</h1>
+
+            <div class="inputContainer">
+                <input type="text" id="name" name="name" class="input" placeholder="a">
+                <label for="name" class="label">Nombre:</label>
+            </div>
+
+            <div class="inputContainer">
+                <input type="text" id="ip" name="ip" class="input" placeholder="a">
+                <label for="ip" class="label">IP:</label>
+            </div>
+
+            <input type="submit" class="submitBtn" value="Enviar">
+
+        </form>
+    
+        <div class="datos">
+            <h2>Dispositivos:</h2>
+            <ul id="listaDatos">
+            </ul>
+        </div> 
+    </div>
+
+    <script>
+
+        var socket = io.connect("http://localhost:3007", { forceNew: true });
+        
+        const miFormulario = document.getElementById('miFormulario');
+        miFormulario.addEventListener('submit', enviarDatos);
+
+        // en React ver como enviar datos a la base de datos
+        function enviarDatos(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const ip = document.getElementById('ip').value;
+            // guarda data en db 
+            fetch('http://localhost:24172/loaDevices', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: name,
+                    ip: ip
+                })
+            })
+            .then(response => {
+                console.log('Response:', response);
+                mostrarDatosEnviados(name, ip);
+                miFormulario.reset();
+                //agregarFormulario();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+            /*
+            setTimeout(() => {
+                obtenerDatos();
+            }, 1000);
+            */
+        }
+
+        // en React esto lo hace el contenedorDispositivo 
+        async function mostrarDatosEnviados(name, ip) {
+            const listaDatos = document.getElementById('listaDatos');
+            const nuevoItem = document.createElement('li');
+            nuevoItem.innerHTML = `
+            <form id="formDelete" onsubmit = "borraDatos('${name}', '${ip}'); return false;">
+                <input type="text" id="name" name="name" value="${name}" readonly>
+                <input type="text" id="${ip}" name="ip" value="${ip}" readonly>
+                <input type="submit" value="Borrar">
+            </form>`;
+            //onsubmit = "borraDatos(${name}, ${ip})"                        
+            listaDatos.appendChild(nuevoItem);
+        }
+
+
+        function borraDatos(name, ip) {
+                //event.preventDefault();
+
+                console.log(`Borrando: ${name}, ${ip} ...`);
+                // borra data de db 
+                fetch('http://localhost:24172/deleteDevices', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        ip: ip
+                    })
+                })
+                .then(response => {                    
+                    location.reload();                    
+                    mostrarDatosEnviados(name, ip);
+                    miFormulario.reset();
+                    agregarFormulario();
+                    
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        function obtenerDatos() { // muestra los dispositivos cargados
+            fetch('http://localhost:24172/getData')
+                .then(response => response.json())
+                .then((data) => {
+                    //console.log('Data: '+JSON.stringify(data));
+                    const listaDatos = document.getElementById('listaDatos');
+                    data.map((e)=>{
+                        const nuevoItem = document.createElement('li');
+                        nuevoItem.innerHTML = `
+                        <form id="formDelete" onsubmit = "borraDatos('${e.name}', '${e.ip}')">
+                            <input type="text" id="name" name="name" value="${e.name}" readonly>
+                            <input type="text" id="${e.ip}" name="ip" value="${e.ip}" readonly>
+                            <input type="submit" value="Borrar">
+                        </form>
+                        <br>`;
+                        listaDatos.appendChild(nuevoItem);
+                    });                    
+                })
+                .catch(error => console.error(error));
+        }
+
+        //para q tiene q volver a llamar cada 1 seg???
+        setTimeout(() => {
+            obtenerDatos();
+            console.log('Dispositivos a mostrar actualizados!');
+        }, 1000);
+
+        socket.on('isConnected', (message) => {
+            console.log(`Mensaje del servidor: ${JSON.stringify(message)}`);
+            let inputText = document.getElementById(`${message.ip}`);
+            let conn = message.connected;
+            if (message.connected){
+                inputText.style = "color: green";
+            } else {
+                inputText.style = "color: red"; 
+            }
+        });
+        
+        socket.on('isConnectedToOdoo', (message) => {
+            if (message === 'false') {
+                alert('Falló el registro!\nIntentelo nuevamente.');
+                setTimeout(() => {
+                    window.location.replace("http://localhost:24172/");
+                }, 2000);
+            } else {
+                console.log('Credenciales Odoo correctas!');
+            }
+        });
+    </script>
+</body>
+</html>

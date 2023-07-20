@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="imagenes/favicon-32x32.png" type="png" sizes="32">
+  <title>Home</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+
+<body>
+  <div class="signupFrm">
+    <form id="miFormulario" class="form">
+      <h1 class="title">REGISTRO</h1>
+
+      <div class="inputContainer">
+        <input type="text" id="host" name="host" required class="input" placeholder="a">
+        <label for="host" class="label">Host:</label>
+      </div>
+
+      <div class="inputContainer">
+        <input type="text" id="puerto" name="puerto" required class="input" placeholder="a">
+        <label for="puerto" class="label">Puerto:</label>
+      </div>
+
+      <div class="inputContainer">
+        <input type="text" id="baseDatos" name="baseDatos" required class="input" placeholder="a">
+        <label for="baseDatos" class="label">Base de datos:</label>
+      </div>
+
+      <div class="inputContainer">
+        <input type="text" id="usuario" name="usuario" required class="input" placeholder="a">
+        <label for="usuario" class="label">Usuario:</label>
+      </div>
+
+      <div class="inputContainer">
+        <input type="password" id="contrasena" name="contrasena" required class="input" placeholder="a">
+        <label for="contrasena" class="label">Contraseña:</label>
+      </div>
+
+      <input type="submit" class="submitBtn" value="Enviar">
+
+    </form>
+  </div>
+  <script>
+
+    const miFormulario = document.getElementById('miFormulario');
+    miFormulario.addEventListener('submit', enviarDatos);
+
+    function enviarDatos(event) {
+      event.preventDefault();
+
+      const host = document.getElementById('host').value;
+      const puerto = document.getElementById('puerto').value;
+      const baseDatos = document.getElementById('baseDatos').value;
+      const usuario = document.getElementById('usuario').value;
+      const contrasena = document.getElementById('contrasena').value;
+
+      fetch('http://localhost:24172/loader', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          host: host,
+          puerto: puerto,
+          baseDatos: baseDatos,
+          usuario: usuario,
+          contrasena: contrasena,
+        })
+      })
+        .then(response => {
+          // hacer algo con la respuesta
+          setTimeout(() => {
+            window.location.replace("http://localhost:24172/loader");
+          }, 1000);
+        })
+        .catch(error => {
+          console.error('Error fetch a /loader (POST):', error);
+        });
+   
+   
+      }
+  </script>
+</body>
+
+</html>
