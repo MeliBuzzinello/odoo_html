@@ -1,107 +1,846 @@
 @import url('https://fonts.googleapis.com/css2?family=Lato&display=swap');
 
 
+
 body {
+
+	display: flex;
+
+	flex-direction: column;
+
+	align-items: center;
+
+	position: relative;
+
+	width: 100%;
+
+	height: 100vh;
+
 	box-sizing: border-box;
+
 	margin: 0;
+
 	padding: 0;
+
 	font-family: "lato", sans-serif;
+
 }
+
+
+
+p {
+
+	cursor: default;
+
+}
+
+
+
+#text {
+
+	text-align: center;
+
+}
+
+
+
+/* ------------- HEADER ---------------*/
+
+
+
+.navbar {
+
+	display: flex;
+
+	align-items: center;
+
+	justify-content: space-between;
+
+	position: relative;
+
+	width: 90%;
+
+	padding: 15px 0px 1px 0px;
+
+}
+
+
+
+.navbar-title {
+
+	color: rgb(78 76 76);
+
+	font-size: 13px;
+
+}
+
+
+
+.logo {
+
+	position: relative;
+
+	width: 12vw;
+
+	min-width: 70px;
+
+}
+
+
+
+/* ------------- VISTA HOME ---------------*/
+
+
 
 .signupForm {
+
 	display: flex;
+
 	justify-content: center;
+
 	align-items: center;
+
 }
+
+
 
 .form {
+
 	width: 270px;
+
 	padding: 20px;
+
 }
+
+
 
 .title {
+
 	font-style: normal;
+
 	font-weight: 400;
+
 	font-size: 32px;
+
 	line-height: 38px;
+
 	color: #09357A;
+
+	cursor: default;
+
 }
+
+
 
 .inputContainer {
+
 	position: relative;
+
 	height: 30px;
+
 	margin-bottom: 17px;
+
 }
+
+
 
 .input {
+
 	position: absolute;
+
 	top: 0px;
+
 	left: 0px;
+
 	height: 100%;
+
 	width: 100%;
+
 	border: none;
+
 	border-bottom: 1px solid rgba(160, 152, 152, 1);
+
 	font-size: 16px;
+
 	outline: none;
+
 	background: none;
+
 	z-index: 1;
+
 }
+
+
 
 ::placeholder {
+
 	color: transparent;
+
 }
+
+
 
 .label {
+
 	position: absolute;
+
 	top: 5px;
+
 	color: rgba(160, 152, 152, 1);
+
 	font-size: 16px;
+
 	transition: 0.5s;
+
 	z-index: 0;
+
 }
+
+
 
 .submitBtn {
+
 	width: 100%;
+
+	margin-top: 20px !important;
+
 	height: 30px;
+
 	display: block;
-	margin-left: auto;
-	border: none;
+
+	border-radius: 2px;
+
 	background-color: rgba(9, 53, 122, 1);
+
 	color: white;
+
 	cursor: pointer;
+
 	font-size: 16px;
-	margin-top: 30px;
-	box-shadow: 1px 8px 14px -8px rgba(0,0,0,0.54);
+
+	box-shadow: 1px 6px 7px -4px rgba(0, 0, 0, 0.54);
+
+	border: aliceblue;
+
 }
+
+
 
 .submitBtn:hover {
+
 	background-color: rgb(23, 89, 196);
+
 }
+
+
 
 .input:focus+.label {
+
 	top: -7px;
+
 	left: 3px;
+
 	z-index: 10;
+
 	font-size: 14px;
+
 	font-weight: 100;
+
 	color: rgb(100, 155, 243);
+
 }
+
+
 
 .input:focus {
+
 	border: none;
+
 	border-bottom: 1px solid #c7c7c7;
+
 }
+
+
 
 .input:not(:placeholder-shown)+.label {
+
 	top: -7px;
+
 	left: 3px;
+
 	z-index: 10;
+
 	font-size: 8px;
+
 	font-weight: 100;
+
 	color: rgb(100, 155, 243);
+
 }
 
+
+
 .sub {
-    font-size: 20px;
+
+	font-size: 20px;
+
 	text-align: center;
+
+}
+
+
+
+.contenedor-padre-odoo {
+
+	display: flex;
+
+	position: relative;
+
+	width: 90%;
+
+	justify-content: center;
+
+}
+
+
+
+/* ------------- VISTA LOADER ---------------*/
+
+
+
+.contenedor-hijo-odoo {
+
+	width: 100%;
+
+	height: 45px;
+
+	display: flex;
+
+	justify-content: space-between;
+
+	align-items: center;
+
+	background: rgba(113, 75, 103, 1);
+
+	border-radius: 3px;
+
+	margin-top: 25px;
+
+	padding: 0% 2.3%;
+
+}
+
+
+
+#stateOdoo {
+
+	display: flex;
+
+	justify-content: space-between;
+
+	position: relative;
+
+}
+
+
+
+.odoo-title {
+
+	color: white;
+
+	font-size: 20px;
+
+	cursor: default;
+
+}
+
+
+
+#odoo-state {
+
+	color: rgb(255, 255, 255);
+
+	cursor: default;
+
+	font-size: 2rem;
+
+}
+
+
+
+.odoo-icono {
+
+	color: white;
+
+	margin: 10px;
+
+	display: none;
+
+	transition: transform 0.3s;
+
+}
+
+
+
+.odoo-icono:hover {
+
+	transform: scale(1.2);
+
+	cursor: pointer;
+
+}
+
+
+
+.contenedor-padre {
+
+	display: flex;
+
+	justify-content: center;
+
+	align-items: center;
+
+	position: relative;
+
+	width: 90%;
+
+	margin-top: 24px;
+
+}
+
+
+
+.contenedor-hijo {
+
+	width: 100%;
+
+	/* height: 300px; */
+
+	border: 1px solid #ccc;
+
+}
+
+
+
+.contenedor-title {
+
+	display: flex;
+
+	justify-content: center;
+
+	align-items: center;
+
+	padding: 1.8% 2.3%;
+
+	border-bottom: 1px solid #ccc;
+
+	cursor: default;
+
+}
+
+
+
+.disp-title {
+
+	width: 90%;
+
+	font-style: normal;
+
+	font-weight: 400;
+
+	font-size: 20px;
+
+	line-height: 38px;
+
+	color: rgba(9, 53, 122, 1);
+
+	text-align: left;
+
+	cursor: default;
+
+}
+
+
+
+.btn {
+
+	display: flex;
+
+	align-items: center;
+
+	justify-content: center;
+
+	flex-direction: row;
+
+	position: relative;
+
+	width: 12vw;
+
+	min-width: fit-content;
+
+	height: 5vh;
+
+	min-height: 32px;
+
+	border-radius: 2px;
+
+	background-color: rgba(9, 53, 122, 1);
+
+	color: white;
+
+	cursor: pointer;
+
+	font-size: 16px;
+
+	box-shadow: 1px 6px 7px -4px rgba(0, 0, 0, 0.54);
+
+	padding: 3px 10px;
+
+	border: aliceblue;
+
+}
+
+
+
+.btn:hover {
+
+	background-color: rgb(23, 89, 196);
+
+}
+
+
+
+table {
+
+	width: 100%;
+
+	text-align: left;
+
+	padding: 0px 15px;
+
+	color: rgb(78 76 76);
+
+	margin: 15px 0px;
+
+}
+
+
+
+th {
+
+	cursor: default;
+
+}
+
+
+
+/*
+
+li {
+
+    list-style: none;
+
+  }
+
+*/
+
+.btn-update-delete {
+
+	text-align: center;
+
+}
+
+
+
+.btn-update-delete:hover {
+
+	cursor: pointer;
+
+}
+
+
+
+.contenedor-form {
+
+	display: flex;
+
+	justify-content: center;
+
+	align-items: center;
+
+	position: relative;
+
+	width: 100%;
+
+}
+
+
+
+
+
+.formNew {
+
+	display: flex;
+
+	flex-flow: wrap;
+
+	position: relative;
+
+	width: 100%;
+
+	justify-content: space-between;
+
+	align-items: center;
+
+	padding: 1.8% 2.3%;
+
+	border-bottom: 1px solid #ccc;
+
+}
+
+
+
+.inputForm {
+
+	display: inline-block;
+
+	width: 34%;
+
+	max-width: 160px;
+
+	height: 5vh;
+
+	background: #D9D9D9;
+
+	border-radius: 3px;
+
+	border: none;
+
+	margin: 4px 0px;
+
+	padding-left: 6px;
+
+}
+
+
+
+input::placeholder {
+
+	color: rgb(78 76 76);
+
+	font-size: 14px;
+
+}
+
+
+
+
+
+.loading-container {
+
+	animation: spin 1s linear infinite;
+
+}
+
+
+
+@keyframes spin {
+
+	from {
+
+		transform: rotate(360deg);
+
+	}
+
+
+
+	to {
+
+		transform: rotate(0deg);
+
+	}
+
+}
+
+
+
+
+
+.pending-loading {
+
+	animation: parpadeo 2s linear infinite;
+
+}
+
+
+
+@keyframes parpadeo {
+
+	0% {
+
+		filter: blur(0px);
+
+	}
+
+
+
+	25% {
+
+		filter: blur(3px);
+
+	}
+
+
+
+	50% {
+
+		filter: blur(0px);
+
+	}
+
+
+
+	75% {
+
+		filter: blur(3px);
+
+	}
+
+}
+
+
+
+
+
+.detailInfo {
+
+	position: absolute;
+
+}
+
+
+
+.container-message {
+
+	display: none;
+
+	justify-content: center;
+
+	align-items: center;
+
+	position: absolute;
+
+	width: 100%;
+
+	height: 100%;
+
+	z-index: 100;
+
+	background-color: #00000099;
+
+}
+
+
+
+.card-message {
+
+	display: flex;
+
+	justify-content: center;
+
+	align-items: center;
+
+	position: relative;
+
+	width: 30vw;
+
+	height: 22vh;
+
+	min-height: 135px;
+
+	max-height: 160px;
+
+	z-index: 110;
+
+	color: white;
+
+	background-color: #000000b5;
+
+	padding: 20px;
+
+	box-sizing: border-box;
+
+	/*box-shadow: 0px 0px 15px -4px rgb(255, 2, 2);*/
+
+	animation: changeBorder 1.5s infinite alternate;
+
+	border-radius: 0.35em;
+
+}
+
+
+
+@keyframes changeBorder {
+
+	from {
+
+		box-shadow: 0px 0px 20px -4px rgb(255, 255, 255);
+
+	}
+
+
+
+	to {
+
+		box-shadow: 0px 0px 20px -4px rgb(255, 0, 0);
+
+	}
+
+}
+
+
+
+
+
+/* ------------- BOTON SWITCH ---------------*/
+
+
+
+.switch {
+	width: 25px;
+}
+
+.lbl-switch {
+	display: inline-block;
+	width: 55px;
+	height: 30px;
+	background: #aaa;
+	border-radius: 100px;
+	position: relative;
+	cursor: pointer;
+}
+
+.lbl-switch:after {
+	position: absolute;
+	content: "";
+	width: 22px;
+	height: 22px;
+	background: #fff;
+	border-radius: 100px;
+	top: 4px;
+	left: 5px;
+	transition: 0.3s;
+}
+
+.switch input[type="checkbox"]:checked~.lbl-switch {
+	background: green;
+  }
+  
+.switch input[type="checkbox"]:checked~.lbl-switch:after {
+	left: 28px;
+  }
+
+.switch input[type="checkbox"] {
+	position: absolute;
+	top: -99999px;
 }

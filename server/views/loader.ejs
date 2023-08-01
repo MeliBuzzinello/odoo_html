@@ -1,79 +1,321 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com;">
+    <meta http-equiv="Content-Security-Policy"
+        content="script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com;">
     <link rel="icon" href="imagenes/favicon-32x32.png" type="png" sizes="32">
-    <title>Home</title>
+    <title>Systel Sync-Odoo</title>
     <link rel="stylesheet" href="css/estilos.css">
     <script crossorigin="anonymous" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
-    <!-- <style>
-           
-        .datos {
-            margin-top: 20px;
-        }
-    
-        .datos h2 {
-            font-size: 18px;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-    
-        .datos ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-    
-        .datos li {
-            margin-bottom: 5px;
-        }
-    </style> -->
 </head>
-<body>
-    <div class="signupFrm">
-        <!--<a href="http://localhost:24172/otraRuta">Otra ruta</a>-->
-        <form id="miFormulario" class="form">
-            <h1 class="title sub">CARGA DE DISPOSITIVOS</h1>
 
-            <div class="inputContainer">
-                <input type="text" id="name" name="name" class="input" placeholder="a">
-                <label for="name" class="label">Nombre:</label>
-            </div>
+<body id="body">
+    <div class='navbar'>
+        <div class='navbar-title'>
+            <p id="dataIp"></p>
+        </div>
 
-            <div class="inputContainer">
-                <input type="text" id="ip" name="ip" class="input" placeholder="a">
-                <label for="ip" class="label">IP:</label>
-            </div>
-
-            <input type="submit" class="submitBtn" value="Enviar">
-
-        </form>
-    
-        <div class="datos">
-            <h2>Dispositivos:</h2>
-            <ul id="listaDatos">
-            </ul>
-        </div> 
     </div>
+    <div class='contenedor-padre-odoo'>
+        <div class='contenedor-hijo-odoo'>
+            <div class='odoo-title'>Conexión a Odoo</div>
+            <div id="stateOdoo">
+                <p id='odoo-state'>&#8986;</p>
 
+            </div>
+        </div>
+    </div>
+    <div class='contenedor-padre'>
+        <div class='contenedor-hijo'>
+            <div class='contenedor-title'>
+                <div class='disp-title'>Dispositivos cargados</div>
+                <button class='btn' id="nuevo">Nuevo</button>
+            </div>
+            <div id="formularioDiv" class="contenedor-form" style="display: none;">
+                <form id="miFormulario" class="formNew">
+                    <input type="text" id="name" name="name" class="inputForm" required placeholder="Nombre">
+                    <input type="text" id="ip" name="ip" class="inputForm" required placeholder="Ip">
+                    <input type="text" id="force" name="force" value="false" style="display: none">
+                    <input type="button" value="Guardar" class="btn" id="guardar">
+                    <input type="submit" value="Cancelar" class="btn" id="cancelar">
+                </form>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>IP</th>
+                        <th>Estado</th>
+                        <th></th> <!--------------Agregar una celda  ----------------->
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="listaDatos" class="datos">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="container-message-ip" class="container-message">
+        <div id="card-message-ip" class="card-message">
+            <p><b>No hay conexión a la red!</b><br>
+                Verifique la conexión con el router.</p>
+        </div>
+    </div>
+    <div id="container-message-odoo" class="container-message">
+        <div id="card-message-odoo" class="card-message">
+            <p><b>No está conectado a Odoo!</b><br>
+                Verifique su conexión a internet.</p>
+        </div>
+    </div>
     <script>
 
-        var socket = io.connect("http://localhost:3007", { forceNew: true });
-        
+        const datoMockeado = {}
+
+        var IP = JSON.stringify(data.ip);
+        const body = document.getElementById("body");
+        const ipElement = document.getElementById("dataIp");
+        const odooState = document.getElementById('odoo-state');
+        const containerIp = document.getElementById('container-message-ip');
+        const containerOdoo = document.getElementById('container-message-odoo');
+        let configActive = false;
+        // console.log('IP local de Odroid: ' + IP);
+        ipElement.textContent = IP;
+        // funcionamiento ver y ocultar formulario
+        const formularioDiv = document.getElementById('formularioDiv');
+        const nuevoBtn = document.getElementById('nuevo');
+        const cancelarBtn = document.getElementById('cancelar');
+        nuevoBtn.addEventListener('click', function () {
+            formularioDiv.style.display = 'flex';
+        });
+        cancelarBtn.addEventListener('click', function () {
+            formularioDiv.style.display = 'none';
+
+        });
+        var socket = io.connect(`http://${IP}:3007`, { forceNew: true });
+        var socket2 = io.connect(`http://${IP}:3008`, { forceNew: true });
+        var socket = io.connect(`http://localhost:3008`, { forceNew: true });
+
+        //Boton configuracion de ODOO
+
+        const configuracionOdoo = document.getElementById('configuracionOdoo');
+        configuracionOdoo.onclick = function () {
+            //socket.disconnect();
+
+            setTimeout(() => {
+                window.location.replace(`http://${IP}:80/register`);
+            }, 1000);
+        };
+
         const miFormulario = document.getElementById('miFormulario');
-        miFormulario.addEventListener('submit', enviarDatos);
+        const guardarBtn = document.getElementById('guardar');
+        guardarBtn.addEventListener('click', enviarDatos);
 
-        // en React ver como enviar datos a la base de datos
+
+        // ######################################## activar boton configuracion ################################################
+
+        console.log('leyendo teclado!');
+        var altCount = 0;
+        var altTimer;
+
+        function resetCount() {
+            altCount = 0;
+        }
+
+        body.addEventListener("keydown", (event) => {
+            if (event.key === 'Control') {
+                altCount++;
+                if (altCount === 1) {
+                    altTimer = setTimeout(resetCount, 1000); // Reiniciar el contador después de 1 segundo
+                } else if (altCount === 3) {
+                    containerOdoo.style = 'display: none';
+                    clearTimeout(altTimer); // Limpiar el temporizador
+                    altCount = 0; // Reiniciar el contador
+                    //console.log('Activando botón de configuración...');
+                    if (configuracionOdoo.style.display === 'inline-block') {
+                        configuracionOdoo.style.display = 'none';
+                        configActive = false;
+                    } else {
+                        configuracionOdoo.style.display = 'inline-block';
+                        configActive = true;
+                    }
+                }
+
+            } else {
+                clearTimeout(altTimer); // Limpiar el temporizador si se suelta la tecla Alt
+                resetCount(); // Reiniciar el contador
+            }
+
+        });
+
+        // ########################################   fin   boton configuracion ################################################
+
+        function crearItemDatos(name, ip) {
+            const nuevoItem = document.createElement('tr');
+            const btnSwitchId = `btn-switch-${ip}`;
+            console.log(btnSwitchId)
+            nuevoItem.innerHTML = `
+                 <td style="cursor: default">${name}</td>
+                 <td style="cursor: default">${ip}</td>
+                 <td style="cursor: default" id="${ip}"></td>
+                 <td class="btn-update-delete" title="Último producto actualizado." style="display: none">
+                    <details>
+                      <summary style="list-style: none" onclick="toggleParragraph('${name}')">
+                        <img src="imagenes/info.svg" alt="info" />
+                      </summary>
+                      <div class="detailInfo" id="divParragraph-${name}">
+                        <p id="parragraph-${name}"></p>
+                      </div>
+                    </details>
+                 </td>
+
+
+                <td class="btn-update-onOff" title="On - Off">
+                    <div class="switch">
+                    <input type="checkbox" id="${btnSwitchId}" onChange="handleSwitchChange('${name}', '${ip}','${btnSwitchId}')">
+                    <label for="${btnSwitchId}" class="lbl-switch"></label>
+                    </div>
+                </td>
+
+
+                 <td class="btn-update-delete" title="Fuerza la actualización de todos los PLU's">
+                   <img class="${ip}" onclick="forceUpdate('${name}', '${ip}')" src="imagenes/update.svg" alt="actualizar"/>
+                 </td>
+                 <td class="btn-update-delete" title="Eliminar">
+                   <img onclick="borraDatos('${name}', '${ip}')" src="imagenes/delete.svg" alt="borrar" />
+                 </td>`;
+
+            return nuevoItem;
+        }
+
+
+        // *****************************  Se agrega el boton tipo switch linea 179 a 184 y (const btnSwitchId = `btn-switch-${ip}`) *****************************//
+
+
+
+        // ******************************** Funcionalidad boton switch * activar/desactivar dispositivo *******************************//
+
+        function handleSwitchChange(name, ip, btnSwitchId) {
+            const switchButton = document.getElementById(btnSwitchId);
+            const labelSwitch = document.querySelector('.lbl-switch');
+            
+            if (switchButton.checked) {
+                console.log('El botón está prendido');
+                enviarDatosStorage(name);
+            } else {
+                console.log('El botón está apagado');
+                borraDatos(name, ip);
+            }
+        }
+
+        // ************************************** FIN Funcionalidad boton switch ** activar/desactivar dispositivo  *******************************//
+
+
+        function obtenerDatos() {
+            fetch(`http://${IP}:80/getData`)
+                .then(response => response.json())
+                .then((data) => {
+                    console.log('Data: ' + JSON.stringify(data));
+                    const listaDatos = document.getElementById('listaDatos');
+                    listaDatos.innerHTML = '';
+                    data.forEach((e) => {
+                        const nuevoItem = crearItemDatos(e.name, e.ip);
+                        listaDatos.appendChild(nuevoItem);
+                    });
+                })
+                .catch(error => console.error(error));
+        }
+
+         //---------------------------- Funcion de prueba para trabajar datos mockeados---------------------
+        // function obtenerDatos() {
+        //     const listaDatos = document.getElementById('listaDatos');
+        //     listaDatos.innerHTML = '';
+        //     const datos = [
+        //         { name: "meli", ip: "00.0023" },
+        //         { name: "Luciano", ip: "00.00125" },
+        //         { name: "Diego", ip: "00.25.63.9" }
+        //     ];
+        //     for (const dato of datos) {
+        //         const nuevoItem = crearItemDatos(dato.name, dato.ip);
+        //         console.log(dato.ip)
+        //         listaDatos.appendChild(nuevoItem);
+        //     }
+        // }
+
         function enviarDatos(event) {
-            event.preventDefault();
-
             const name = document.getElementById('name').value;
             const ip = document.getElementById('ip').value;
-            // guarda data en db 
-            fetch('http://localhost:24172/loaDevices', {
+            const force = document.getElementById('force').value;
+
+            //  const dispositivo = { name, ip };
+            //  const dispositivoJSON = JSON.stringify(dispositivo);
+            localStorage.setItem(name, ip);   // ---------------------------- guardar datos en el local storage------------------------ 
+            //  localStorage.setItem("dispositivo", dispositivo);
+
+            if (name === '' || ip === '') {
+                alert('Por favor, complete todos los campos');
+                return; // Detener el envío del formulario
+            }
+
+            fetch(`http://${IP}:80/loaDevices`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: name,
+                    ip: ip,
+                    force: force
+                })
+            })
+                .then(response => {
+                    miFormulario.reset();
+                    formularioDiv.style.display = 'none';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        // ********************************************************* Funcionalidad boton switch of - on ***************************************//
+
+        function enviarDatosStorage(name) {
+
+            const dispositivoJSON = localStorage.getItem(name);
+            const ip = JSON.parse(dispositivoJSON);
+
+            fetch(`http://${IP}:80/loaDevices`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: name,
+                    ip: ip,
+                    force: false
+                })
+            })
+                .then(response => {
+                    miFormulario.reset();
+                    formularioDiv.style.display = 'none';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+
+        // ********************************************************* FIN Funcionalidad boton switch of - on ***************************************//
+
+
+        function borraDatos(name, ip) {
+            event.preventDefault();
+            console.log(`Borrando: ${name}, ${ip} ...`);
+                fetch(`http://${IP}:80/deleteDevices`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -83,43 +325,121 @@
                     ip: ip
                 })
             })
-            .then(response => {
-                console.log('Response:', response);
-                mostrarDatosEnviados(name, ip);
-                miFormulario.reset();
-                //agregarFormulario();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-            /*
+                .then(response => {
+                    localStorage.removeItem(name);   /// -------------------------- borrar elemento del local storage ----------------- 
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+        setTimeout(() => {
+            obtenerDatos();
+        }, 500);
+
+        //······························· Sockets ·······························································
+
+
+        socket.on('isConnected', (message) => {
+            //console.log(`Mensaje del servidor: ${JSON.stringify(message)}`);
+            let inputText = document.getElementById(`${message.ip}`);
+            let parragraph = document.getElementById(`parragraph-${message.name}`);
+            const nuevoItem = document.createElement('li');
+            nuevoItem.style = "list-style: none";
+            if (inputText) {
+                if (message.connected) {
+                    nuevoItem.innerHTML = `Activo`;
+                    inputText.style = "color: green; cursor: default";
+                } else {
+                    nuevoItem.innerHTML = `Inactivo`;
+                    inputText.style = "color: red; cursor: default";
+                }
+                inputText.innerHTML = "";
+                inputText.appendChild(nuevoItem);
+            }
+        });
+
+
+        //####################   Sin internet y/u Odoo connect   ##############################
+
+        socket.on('isConnectedToOdoo', (message) => {
+            //console.clear();
+            console.log('Estado red: ' + JSON.stringify(message));
+
+            if (IP != message.ip) {
+                if (message.ip != '' && message.ip != null && message.ip != false && message.ip != undefined) {
+                    window.location.replace(`http://${message.ip}:80/loader`);// esto es para que recargue la pagina y actualice la variable "IP" que se usa en los fetchs y websockets(para que la web sepa a qué ip conectarse(por eso no puede ser localhost)). 
+                }
+            }
+
+
+            if (message.ip === '' || message.ip === '127.0.0.1') { // sino hay IP (deconexión con el router)
+                ipElement.textContent = 'Sin red.';
+                odooState.innerHTML = "&#10007;";
+                odooState.style = "color: white"
+                containerIp.style = 'display: flex';
+            } else { // si hay IP
+                ipElement.textContent = message.ip;
+                containerIp.style = 'display: none';
+                if (message.odoo === 'false') { // sin no hay conexion con Odoo pero si hay IP (sin internet)
+                    odooState.innerHTML = "&#10007;";
+                    odooState.style = "color: white"
+                    if (configActive === false) { // si NO activaron el boton de configuración.
+                        containerOdoo.style = 'display: flex'; // semuestra el mensaje
+                    } else {
+                        containerOdoo.style = 'display: none'; // no se muestra
+                    }
+                } else { //Si hay conexion con Odoo y tambien hay ip
+                    odooState.innerHTML = "&#10003;";
+                    odooState.style = "color: white"
+                    containerOdoo.style = 'display: none';
+                }
+            }
+        });
+
+        //######################################################################################
+
+
+        let intervalID = null;
+
+
+        //####################   deconexión con el router o servidor apagado   ##############################        
+
+        socket.on('disconnect', (reason) => { // sino hay IP (deconexión con el router o servidor apagado)
+            console.log('Sin red(socket disconnect()): deconexión con el router o servidor apagado.');
+            console.log('actualizando la pagina cada diez segundos...');
+            ipElement.textContent = 'Sin red.';
+            odooState.innerHTML = "&#10007;";
+            odooState.style = "color: white"
+            containerIp.style = 'display: flex';
+            intervalID = setInterval(() => {
+                fetch(`http://localhost:80/getOdroidIP`, { method: 'GET' }).then(response => response.json())
+                    .then((data) => {
+                        let ip = data.replace(/"/g, '');
+                        console.log('ip: ' + ip);
+                        if (ip != '' && ip != null && ip != false && ip != undefined) {
+                            window.location.replace(`http://${ip}:80/loader`);
+                        }
+                    });
+            }, 10000);
+        });
+
+        socket.on('connect', () => {
+            console.log('Red ok(socket connect()): conexión con el router o servidor encendido.');
+            clearInterval(intervalID);
             setTimeout(() => {
+                console.log('Obteniendo datos...');
                 obtenerDatos();
             }, 1000);
-            */
-        }
+        });
 
-        // en React esto lo hace el contenedorDispositivo 
-        async function mostrarDatosEnviados(name, ip) {
-            const listaDatos = document.getElementById('listaDatos');
-            const nuevoItem = document.createElement('li');
-            nuevoItem.innerHTML = `
-            <form id="formDelete" onsubmit = "borraDatos('${name}', '${ip}'); return false;">
-                <input type="text" id="name" name="name" value="${name}" readonly>
-                <input type="text" id="${ip}" name="ip" value="${ip}" readonly>
-                <input type="submit" value="Borrar">
-            </form>`;
-            //onsubmit = "borraDatos(${name}, ${ip})"                        
-            listaDatos.appendChild(nuevoItem);
-        }
+        //####################################################################################################
 
 
-        function borraDatos(name, ip) {
-                //event.preventDefault();
-
-                console.log(`Borrando: ${name}, ${ip} ...`);
-                // borra data de db 
-                fetch('http://localhost:24172/deleteDevices', {
+        function forceUpdate(name, ip) {
+            event.preventDefault();
+            setTimeout(async () => {
+                console.log('Forzando carga de todos los PLUs...');
+                await fetch(`http://${IP}:80/forceUpdate`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -129,66 +449,55 @@
                         ip: ip
                     })
                 })
-                .then(response => {                    
-                    location.reload();                    
-                    mostrarDatosEnviados(name, ip);
-                    miFormulario.reset();
-                    agregarFormulario();
-                    
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
+                    .then(response => response.json())
+                    .then((message) => {
+                        console.log('forceUpdate() >>> response: ' + JSON.stringify(message.ip));
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            }, 1500);
         }
 
-        function obtenerDatos() { // muestra los dispositivos cargados
-            fetch('http://localhost:24172/getData')
-                .then(response => response.json())
-                .then((data) => {
-                    //console.log('Data: '+JSON.stringify(data));
-                    const listaDatos = document.getElementById('listaDatos');
-                    data.map((e)=>{
-                        const nuevoItem = document.createElement('li');
-                        nuevoItem.innerHTML = `
-                        <form id="formDelete" onsubmit = "borraDatos('${e.name}', '${e.ip}')">
-                            <input type="text" id="name" name="name" value="${e.name}" readonly>
-                            <input type="text" id="${e.ip}" name="ip" value="${e.ip}" readonly>
-                            <input type="submit" value="Borrar">
-                        </form>
-                        <br>`;
-                        listaDatos.appendChild(nuevoItem);
-                    });                    
-                })
-                .catch(error => console.error(error));
-        }
+        //Genra el parpadeo en el icono update
 
-        //para q tiene q volver a llamar cada 1 seg???
-        setTimeout(() => {
-            obtenerDatos();
-            console.log('Dispositivos a mostrar actualizados!');
-        }, 1000);
+        socket2.on('latentIcon', (ip) => { // el emit viene de "/forceUpdate"            
+            let spinner = document.getElementsByClassName(`${ip}`)[0];
+            let spinners = document.getElementsByClassName(`${ip}`);
+            spinner.classList.add('pending-loading');
+            spinner.onclick = null;
+            spinners.disabled = true;
+        });
 
-        socket.on('isConnected', (message) => {
-            console.log(`Mensaje del servidor: ${JSON.stringify(message)}`);
-            let inputText = document.getElementById(`${message.ip}`);
-            let conn = message.connected;
-            if (message.connected){
-                inputText.style = "color: green";
-            } else {
-                inputText.style = "color: red"; 
-            }
+        //Genera el movimiento en el icono update
+
+        socket.on('forceLoadInited', (ip) => {
+            let spinner = document.getElementsByClassName(`${ip}`)[0];
+            let spinners = document.getElementsByClassName(`${ip}`);
+            spinner.classList.remove('pending-loading');
+            spinner.classList.add('loading-container');
+            spinner.onclick = null;
         });
-        
-        socket.on('isConnectedToOdoo', (message) => {
-            if (message === 'false') {
-                alert('Falló el registro!\nIntentelo nuevamente.');
-                setTimeout(() => {
-                    window.location.replace("http://localhost:24172/");
-                }, 2000);
-            } else {
-                console.log('Credenciales Odoo correctas!');
-            }
+
+        //Detiene el movimiento en el icono update
+
+        socket.on('forceLoadFinish', (ip) => {
+            let spinner = document.getElementsByClassName(`${ip}`)[0];
+            let spinners = document.getElementsByClassName(`${ip}`);
+            spinner.classList.remove('loading-container');
+            //spinner.onclick = forceUpdate(`${name}`, `${ip}`);
+            spinner.onclick = forceUpdate.bind(null, `${name}`, `${ip}`);
+            spinners.disabled = false;
         });
+
+        socket2.on('reloadDevices', () => { // el emit viene de "/getData"
+            setTimeout(() => {
+                console.log('Obteniendo datos...');
+                obtenerDatos();
+            }, 800);
+        });
+
     </script>
 </body>
+
 </html>

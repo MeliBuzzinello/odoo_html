@@ -1,14 +1,1 @@
-[
-    {
-        "name": "Cuora 1 Luciano",
-        "ip": "192.168.2.182"
-    },
-    {
-        "name": "melisa buzzinello",
-        "ip": "192.168.1.189"
-    },
-    {
-        "name": "Cuora 2",
-        "ip": "192.168.2.171"
-    }
-]
+[{"name":"meli","ip":"0.00.0","force":"false"}]
